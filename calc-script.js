@@ -1,137 +1,128 @@
-    let subjects = [];
-    let editIndex = -1;
+let studentName = "";
+let subjects = [];
+let semesters = [];
+let editIndex = -1;
 
-function addSubject() {
-    const subjectInput = 
-        document.getElementById('subject');
-    const grade = 
-        document.getElementById('grade').value;
-    const creditInput = 
-        document.getElementById('credit');
-    const credit = 
-        parseInt(creditInput.value);
-
-    const inputError = 
-        document.getElementById('inputError')
-    const creditError = 
-        document.getElementById('creditError');
-    if (!subjectInput.value || isNaN(credit)) {
-        inputError.textContent = 
-            'Please fill out all fields.';
-        return;
-    }
-    else if (credit < 1 || credit > 4) {
-        creditError.textContent = 
-            'Credit must be between 1 and 4';
-        return;
-    } else {
-        creditError.textContent = '';
-    }
-    if (editIndex !== -1) {
-        subjects[editIndex] = 
-        { subject: subjectInput.value, grade, credit };
-        editIndex = -1;
-    } else {
-        subjects.push(
-            { subject: subjectInput.value, grade, credit });
-    }
-
-    displaySubjects();
-    clearForm();
+function proceedTo(type) {
+  studentName = document.getElementById("studentName").value.trim();
+  if (!studentName) {
+    alert("Please enter your name.");
+    return;
+  }
+  document.getElementById("sgpaStudentName").textContent = "Student: " + studentName;
+  document.getElementById("cgpaStudentName").textContent = "Student: " + studentName;
+  showSection(type);
 }
 
-function displaySubjects() {
-    const subjectList = 
-        document.getElementById('subjectList');
-    subjectList.innerHTML = '';
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
 
-    subjects.forEach((s, index) => {
-        const row = document.createElement('tr');
+function goBack() {
+  document.getElementById("studentName").value = "";
+  showSection("landing");
+}
 
-        const subjectCell = document.createElement('td');
-        subjectCell.textContent = s.subject;
+// SGPA logic
+function addSubject() {
+  const subject = document.getElementById("subject").value;
+  const grade = document.getElementById("grade").value;
+  const credit = parseInt(document.getElementById("credit").value);
 
-        const gradeCell = document.createElement('td');
-        gradeCell.textContent = s.grade;
+  if (!subject || !grade || isNaN(credit)) {
+    alert("Fill all fields correctly.");
+    return;
+  }
 
-        const creditCell = document.createElement('td');
-        creditCell.textContent = s.credit;
+  const subjectData = { subject, grade, credit };
 
-        const actionCell = document.createElement('td');
-        const editButton = document.createElement('button');
-        editButton.className = 'edit';
-        editButton.textContent = 'Edit';
-        editButton.onclick = () => editSubject(index);
+  if (editIndex === -1) {
+    subjects.push(subjectData);
+  } else {
+    subjects[editIndex] = subjectData;
+    editIndex = -1;
+    document.querySelector("#sgpaForm button").textContent = "Add";
+  }
 
-        const deleteButton = document.createElement('button');
-        deleteButton.className = 'delete';
-        deleteButton.textContent = 'Delete';
-        deleteButton.onclick = () => deleteSubject(index);
+  updateSubjectList();
+  document.getElementById("sgpaForm").reset();
+}
 
-        actionCell.appendChild(editButton);
-        actionCell.appendChild(deleteButton);
-
-        row.appendChild(subjectCell);
-        row.appendChild(gradeCell);
-        row.appendChild(creditCell);
-        row.appendChild(actionCell);
-
-        subjectList.appendChild(row);
-    });
+function updateSubjectList() {
+  const tbody = document.getElementById("subjectList");
+  tbody.innerHTML = "";
+  subjects.forEach((s, i) => {
+    tbody.innerHTML += `<tr>
+      <td>${s.subject}</td>
+      <td>${s.grade}</td>
+      <td>${s.credit}</td>
+      <td>
+        <button onclick="editSubject(${i})">Edit</button>
+        <button onclick="deleteSubject(${i})">Delete</button>
+      </td>
+    </tr>`;
+  });
 }
 
 function editSubject(index) {
-    const subjectInput = 
-        document.getElementById('subject');
-    const selectedSubject = subjects[index];
-
-    subjectInput.value = selectedSubject.subject;
-    document.getElementById('grade').value = 
-        selectedSubject.grade;
-    document.getElementById('credit').value = 
-        selectedSubject.credit;
-
-    editIndex = index;
+  const item = subjects[index];
+  document.getElementById("subject").value = item.subject;
+  document.getElementById("grade").value = item.grade;
+  document.getElementById("credit").value = item.credit;
+  editIndex = index;
+  document.querySelector("#sgpaForm button").textContent = "Update";
 }
 
 function deleteSubject(index) {
-    subjects.splice(index, 1);
-    displaySubjects();
-}
-
-function calculateSGPA() {
-    const totalCredits = subjects.reduce(
-    (sum, s) => sum + s.credit, 0);
-    const weightedSum = subjects.reduce(
-    (sum, s) => sum + getGradePoint(s.grade) * s.credit, 0);
-
-    const sgpa = totalCredits === 0 ? 0 : 
-    (weightedSum / totalCredits).toFixed(2);
-    document.getElementById('sgpa').textContent = sgpa;
+  subjects.splice(index, 1);
+  updateSubjectList();
+  if (editIndex === index) {
+    document.getElementById("sgpaForm").reset();
+    editIndex = -1;
+    document.querySelector("#sgpaForm button").textContent = "Add";
+  }
 }
 
 function getGradePoint(grade) {
-    switch (grade) {
-        case 'O': return 10.0;
-        case 'A': return 9.0;
-        case 'B': return 8.0;
-        case 'C': return 7.0;
-        case 'D': return 6.0;
-        case 'F': return 0.0;
-        default: return 0.0;
-    }
+  const map = { O: 10, A: 9, B: 8, C: 7, D: 6, F: 0 };
+  return map[grade] || 0;
 }
 
-function clearForm() {
-    document.getElementById('subject').value = '';
-    document.getElementById('grade').value = '';
-    document.getElementById('credit').value = '';
+function calculateSGPA() {
+  let totalPoints = 0;
+  let totalCredits = 0;
+  subjects.forEach(s => {
+    totalPoints += getGradePoint(s.grade) * s.credit;
+    totalCredits += s.credit;
+  });
+  const sgpa = totalCredits ? (totalPoints / totalCredits).toFixed(2) : "0.00";
+  document.getElementById("sgpaResult").textContent = sgpa;
 }
 
-function resetForm() {
-    subjects = [];
-    editIndex = -1;
-    document.getElementById('subjectList').innerHTML = '';
-    document.getElementById('sgpa').textContent = '0.00';
-    clearForm();
+// CGPA logic
+function addSemester() {
+  const sgpa = parseFloat(document.getElementById("cgpaInput").value);
+  if (isNaN(sgpa)) {
+    alert("Enter valid SGPA.");
+    return;
+  }
+  semesters.push(sgpa);
+  updateSemesterList();
+  document.getElementById("cgpaForm").reset();
 }
+
+function updateSemesterList() {
+  const tbody = document.getElementById("semesterList");
+  tbody.innerHTML = "";
+  semesters.forEach((sgpa, i) => {
+    tbody.innerHTML += `<tr><td>${i + 1}</td><td>${sgpa}</td></tr>`;
+  });
+}
+
+function calculateCGPA() {
+  const total = semesters.reduce((a, b) => a + b, 0);
+  const cgpa = semesters.length ? (total / semesters.length).toFixed(2) : "0.00";
+  document.getElementById("cgpaResult").textContent = cgpa;
+}
+
