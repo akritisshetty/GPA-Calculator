@@ -1,36 +1,69 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Calculator</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GradePoint Calculator</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
-  <fieldset id="container">
-    <form name="calculator">
+    <!-- Landing Page -->
+    <section id="landing" class="section active">
+      <h1>Welcome to the Grade Point Calculator</h1>
+      <input type="text" id="studentName" placeholder="Enter your name" required />
+      <p>Select your calculator:</p>
+      <button onclick="proceedTo('sgpa')">SGPA Calculator</button>
+      <button onclick="proceedTo('cgpa')">CGPA Calculator</button>
+    </section>
 
-      <input id="display" type="text" name="display" readonly>
+    <!-- SGPA Calculator -->
+    <section id="sgpa" class="section">
+      <h2>SGPA Calculator</h2>
+      <p id="sgpaStudentName"></p>
+      <form id="sgpaForm">
+        <input type="text" id="subject" placeholder="Subject Name" required />
+        <select id="grade" required>
+          <option value="">Grade</option>
+          <option value="O">O</option>
+          <option value="A">A</option>
+          <option value="B">B</option>
+          <option value="C">C</option>
+          <option value="D">D</option>
+          <option value="F">F</option>
+        </select>
+        <input type="number" id="credit" placeholder="Credits" min="1" max="4" required />
+        <button type="button" onclick="addSubject()">Add</button>
+      </form>
+      <table>
+        <thead><tr><th>Subject</th><th>Grade</th><th>Credits</th><th>Action</th></tr></thead>
+        <tbody id="subjectList"></tbody>
+      </table>
+      <h3>SGPA: <span id="sgpaResult">0.00</span></h3>
+      <button onclick="calculateSGPA()">Calculate</button>
+      <button onclick="window.print()">Print Report</button>
+      <button onclick="goBack()">Back</button>
+    </section>
 
-      <input class="button digits" type="button" value="7" onclick="calculator.display.value += '7'">
-      <input class="button digits" type="button" value="8" onclick="calculator.display.value += '8'">
-      <input class="button digits" type="button" value="9" onclick="calculator.display.value += '9'">
-      <input class="button mathButtons" type="button" value="÷" onclick="calculator.display.value += ' / '">
-      <br>
-      <input class="button digits" type="button" value="4" onclick="calculator.display.value += '4'">
-      <input class="button digits" type="button" value="5" onclick="calculator.display.value += '5'">
-      <input class="button digits" type="button" value="6" onclick="calculator.display.value += '6'">
-      <input class="button mathButtons" type="button" value="x" onclick="calculator.display.value += ' * '">
-      <br>
-      <input class="button digits" type="button" value="1" onclick="calculator.display.value += '1'">
-      <input class="button digits" type="button" value="2" onclick="calculator.display.value += '2'">
-      <input class="button digits" type="button" value="3" onclick="calculator.display.value += '3'">
-      <input class="button mathButtons" type="button" value="-" onclick="calculator.display.value += ' - '">
-      <br>
-      <input class="button digits" type="button" value="0" onclick="calculator.display.value += '0'">
-            <input class="button digits" type="button" value="." onclick="calculator.display.value += '.'">
-      <input class="button mathButtons" type="button" value="+" onclick="calculator.display.value += ' + '">
-            <input class="button equalButtons" type="button" value="=" onclick="calculator.display.value = eval(calculator.display.value)">
-    </form>
-  </fieldset>
+    <!-- CGPA Calculator -->
+    <section id="cgpa" class="section">
+      <h2>CGPA Calculator</h2>
+      <p id="cgpaStudentName"></p>
+      <form id="cgpaForm">
+        <input type="number" id="cgpaInput" placeholder="Enter SGPA for Semester" step="0.01" min="0" max="10" required />
+        <button type="button" onclick="addSemester()">Add Semester</button>
+      </form>
+      <table>
+        <thead><tr><th>Semester</th><th>SGPA</th></tr></thead>
+        <tbody id="semesterList"></tbody>
+      </table>
+      <h3>CGPA: <span id="cgpaResult">0.00</span></h3>
+      <button onclick="calculateCGPA()">Calculate</button>
+      <button onclick="window.print()">Print Report</button>
+      <button onclick="goBack()">Back</button>
+    </section>
   </div>
+  <script src="script.js"></script>
 </body>
 </html>
+
